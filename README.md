@@ -1,35 +1,6 @@
 
 
 ```markdown
-# 🌾 Agricultural Chatbot
-
-This project is an interactive multilingual chatbot designed to provide answers to agricultural queries. It uses state-of-the-art NLP techniques, including embeddings from the `sentence-transformers` model, to find the closest matching question from a dataset and generate responses. The chatbot also supports language detection, translation, and speech synthesis for enhanced usability.
-
----
-
-## 📋 Features
-
-- **Multilingual Support**: Automatically detects the input language and provides answers in the same language using translation.
-- **Question Similarity Matching**: Uses embeddings and cosine similarity to find the most relevant answer from the dataset.
-- **Text-to-Speech**: Converts answers into audio for improved accessibility.
-- **Logging**: Saves user interactions and their responses for future analysis.
-- **Streamlit-Based UI**: A user-friendly web interface powered by Streamlit.
-
----
-
-## 🛠️ Tech Stack
-
-- **Python**: Programming language
-- **Streamlit**: Web application framework
-- **Transformers**: For embedding generation
-- **Deep Translator**: For text translation
-- **Google Text-to-Speech (gTTS)**: For speech synthesis
-- **pandas**: For data handling
-- **scikit-learn**: For cosine similarity computation
-- **PyTorch**: Deep learning framework
-
----
-
 ## 📂 Project Structure
 
 ```
@@ -50,23 +21,24 @@ project/
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Python 3.8 or higher
 - Internet connection for downloading models and using translation services
 
 ### Installation
 
-1. Clone the repository:
+1. **Clone the repository:**
    ```bash
    git clone https://github.com/your-username/agricultural-chatbot.git
    cd agricultural-chatbot
    ```
 
-2. Install dependencies:
+2. **Install dependencies:**
    ```bash
    pip install -r requirements.txt
    ```
 
-3. (Optional) Install system dependencies for deployment:
+3. **(Optional) Install system dependencies for deployment:**
    Create a `packages.txt` file with the following content:
    ```plaintext
    libglib2.0-0
@@ -74,18 +46,20 @@ project/
    libxrender1
    libxext6
    ```
-   Then, use it in deployment platforms like Streamlit Cloud.
+   Use this file in deployment platforms like Streamlit Cloud if needed.
 
-4. Preprocess the dataset:
+4. **Preprocess the dataset:**
    Run the preprocessing script to generate embeddings:
    ```bash
    python preprocess.py
    ```
 
-5. Launch the chatbot:
+5. **Launch the chatbot:**
    ```bash
    streamlit run app.py
    ```
+
+---
 
 ---
 
@@ -164,7 +138,7 @@ The logs are saved in `conversation_logs.csv` for later analysis.
 
 ## 🧑‍💻 Author
 
-- **Your Name**  
+- **Abhishek Madhu Vidya**  
   [GitHub](https://github.com/your-username) | [LinkedIn](https://www.linkedin.com/in/your-profile)
 
 ---
@@ -174,4 +148,3 @@ The logs are saved in `conversation_logs.csv` for later analysis.
 This project is licensed under the MIT License. See the `LICENSE` file for more details.
 ```
 
----

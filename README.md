@@ -42,6 +42,8 @@ project/
 └── README.md                    # Project documentation
 ```
 
+---
+
 ## 🚀 Getting Started
 
 ### Prerequisites

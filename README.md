@@ -27,10 +27,31 @@ This project is an interactive multilingual chatbot designed to provide answers 
 
 ---
 
+The issue lies in the lack of proper code block formatting in the **Project Structure** section. Use triple backticks (` ``` `) to ensure the directory structure renders properly in Markdown. Here's the corrected version:
+
+
 ## 📂 Project Structure
 
-project/ │ ├── app.py # Main Streamlit application ├── datasets/ │ └── agri.csv # Dataset containing agricultural questions and answers ├── Saved_state/ │ └── embeddings.pkl # Preprocessed question embeddings ├── conversation_logs.csv # Logs of user interactions ├── requirements.txt # Python dependencies └── README.md # Project documentation
----
+```
+project/
+│
+├── app.py                       # Main Streamlit application
+├── datasets/
+│   └── agri.csv                 # Dataset containing agricultural questions and answers
+├── Saved_state/
+│   └── embeddings.pkl           # Preprocessed question embeddings
+├── conversation_logs.csv        # Logs of user interactions
+├── requirements.txt             # Python dependencies
+└── README.md                    # Project documentation
+```
+
+
+### Instructions:
+1. Copy and paste the above content into your `README.md` file.
+2. Ensure that the code block is enclosed within triple backticks (` ``` `), as shown above.
+3. Push the changes to your GitHub repository.
+
+This will fix the formatting issue, and the directory structure will display as a properly formatted block in your GitHub README.
 
 ## 🚀 Getting Started
 

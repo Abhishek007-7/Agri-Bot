@@ -151,7 +151,7 @@ The logs are saved in `conversation_logs.csv` for later analysis.
 ## 🧑‍💻 Author
 
 - **Abhishek Madhu Vidya**  
-  [GitHub](https://abhishek007-7.github.io/My_Portfolio/) | [LinkedIn](https://www.linkedin.com/in/abhishek-mv-2a1003109/)
+  [My Portfolio](https://abhishek007-7.github.io/My_Portfolio/) | [LinkedIn](https://www.linkedin.com/in/abhishek-mv-2a1003109/) | [GitHub](https://github.com/Abhishek007-7)
 
 ---
 

@@ -151,12 +151,10 @@ The logs are saved in `conversation_logs.csv` for later analysis.
 ## 🧑‍💻 Author
 
 - **Abhishek Madhu Vidya**  
-  [GitHub](https://github.com/your-username) | [LinkedIn](https://www.linkedin.com/in/your-profile)
+  [GitHub](https://abhishek007-7.github.io/My_Portfolio/) | [LinkedIn](https://www.linkedin.com/in/abhishek-mv-2a1003109/)
 
 ---
 
 ## 📜 License
 
 This project is licensed under the MIT License. See the `LICENSE` file for more details.
-```
-

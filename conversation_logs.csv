@@ -1,0 +1,36 @@
+Question,Answer,Detected Language,Actual Language,Relevance Score,Correct Output,Timestamp
+what are fertilizers?,Fertilizers are substances that are added to soil to improve the growth and quality of crops,en,en,5,True,2024-11-30 19:46:57
+രാസവളങ്ങൾ എന്തൊക്കെയാണ്?,വിളകളുടെ വളർച്ചയും ഗുണനിലവാരവും മെച്ചപ്പെടുത്തുന്നതിന് മണ്ണിൽ ചേർക്കുന്ന വസ്തുക്കളാണ് രാസവളങ്ങൾ,ml,ml,5,True,2024-11-30 19:47:07
+എന്താണ് കീട നിയന്ത്രണം?,ഒരു ജീവനക്കാരുടെ നിയന്ത്രണം അല്ലെങ്കിൽ മാനേജ്മെന്റ് ഒരു കീടമായി നിർവചിച്ചിരിക്കുന്നു;മനുഷ്യന്റെ പ്രവർത്തനങ്ങളിൽ അല്ലെങ്കിൽ പരിസ്ഥിതിയെക്കുറിച്ച് പ്രതികൂലമായി ബാധിക്കുന്ന ഏതെങ്കിലും മൃഗങ്ങൾ അല്ലെങ്കിൽ പ്ലാന്റ് അല്ലെങ്കിൽ ഫംഗസ് പോലുള്ളവ,ml,ml,5,True,2024-11-30 19:47:19
+What is pest control?,"is the regulation or management of a species defined as a pest; such as any animal, plant or fungus that impacts adversely on human activities or environment",en,en,5,True,2024-11-30 19:47:30
+How can I increase the yield of my potato crop?,"Potato yield can be increased by taking steps to improve soil fertility, such as using organic matter and maintaining proper soil pH",en,en,5,True,2024-11-30 19:47:39
+എൻ്റെ ഉരുളക്കിഴങ്ങ് വിളയുടെ വിളവ് എങ്ങനെ വർദ്ധിപ്പിക്കാം?,ജൈവവസ്തുക്കൾ ഉപയോഗിക്കുകയും ശരിയായ മണ്ണിന്റെ ph ഉപയോഗിക്കുകയും ചെയ്യുന്നതുപോലെ മണ്ണിന്റെ ഫലഭൂയിഷ്ഠത മെച്ചപ്പെടുത്തുന്നതിനായി ഉരുളക്കിഴങ്ങ് വിളവ് വർദ്ധിപ്പിക്കാൻ കഴിയും,ml,ml,5,True,2024-11-30 19:47:50
+what are different cassava diseases?,Cassava ,en,en,5,True,2024-11-30 20:42:16
+what are fertilizers?,Fertilizers are substances that are added to soil to improve the growth and quality of crops,en,en,5,True,2024-11-30 20:42:29
+Is crop rotation important in farming?,"This helps to prevent soil erosion and depletion, and can also help to control pests and diseases",en,en,5,True,2024-11-30 20:48:57
+కాసావా వ్యాధి నిర్వహణకు స్థిరమైన విధానాలు ఏమిటి?,"జంతువులకు తగినంత ఆహారం, నీరు మరియు ఆశ్రయం అందించేలా చూసుకోవడం, అలాగే సాధారణ పశువైద్య చెక్-అప్‌లు మరియు టీకాల ద్వారా వారి ఆరోగ్యాన్ని కాపాడుతుంది",te,te,5,True,2024-11-30 21:09:55
+why are fertilizers used in farming?, to improve the growth and quality of crops,en,en,5,True,2024-11-30 21:29:10
+"what are the sustainable approaches to cassava disease management?
+
+",breeding disease-resistant varieties and using natural pest control methods.,en,en,5,True,2024-11-30 21:30:02
+కాసావా వ్యాధి నిర్వహణకు స్థిరమైన విధానాలు ఏమిటి?,"జంతువులకు తగినంత ఆహారం, నీరు మరియు ఆశ్రయం అందించేలా చూసుకోవడం, అలాగే సాధారణ పశువైద్య చెక్-అప్‌లు మరియు టీకాల ద్వారా వారి ఆరోగ్యాన్ని కాపాడుతుంది",te,te,5,True,2024-11-30 21:30:35
+"కాసావా వ్యాధి నిర్వహణకు స్థిరమైన విధానాలు ఏమిటి?
+
+","జంతువులకు తగినంత ఆహారం, నీరు మరియు ఆశ్రయం అందించేలా చూసుకోవడం, అలాగే సాధారణ పశువైద్య చెక్-అప్‌లు మరియు టీకాల ద్వారా వారి ఆరోగ్యాన్ని కాపాడుతుంది",te,te,5,True,2024-11-30 21:35:20
+కాసావా వ్యాధి నిర్వహణకు స్థిరమైన విధానాలు ఏమిటి?,"జంతువులకు తగినంత ఆహారం, నీరు మరియు ఆశ్రయం అందించేలా చూసుకోవడం, అలాగే సాధారణ పశువైద్య చెక్-అప్‌లు మరియు టీకాల ద్వారా వారి ఆరోగ్యాన్ని కాపాడుతుంది",te,te,5,True,2024-11-30 21:37:54
+కాసావా వ్యాధి నిర్వహణకు స్థిరమైన విధానాలు ఏమిటి?,వ్యాధి-నిరోధక రకాలను పెంపకం చేయడం మరియు సహజ తెగులు నియంత్రణ పద్ధతులను ఉపయోగించడం.,te,te,5,True,2024-11-30 21:54:49
+"కాసావా వ్యాధి నిర్వహణకు స్థిరమైన విధానాలు ఏమిటి?
+
+",వ్యాధి-నిరోధక రకాలను పెంపకం చేయడం మరియు సహజ తెగులు నియంత్రణ పద్ధతులను ఉపయోగించడం.,te,te,5,True,2024-11-30 22:10:29
+వ్యవసాయ ఆటోయేషన్‌లో మోటరైజ్డ్ యాంత్రీకరణ యొక్క ఏదైనా రూపాన్ని పేర్కొనండి.,దున్నడం మరియు పాలు పితకడం,te,te,5,True,2024-11-30 22:11:16
+what is Mechanical pest control.,"is the use of hands-on techniques as well as simple equipment and devices, that provides a protective barrier between plants and insects",en,en,5,True,2024-11-30 22:47:06
+which region has the adoption of motorized mechanization has stalled over the past decades., Sub-Saharan Africa,en,en,5,True,2024-11-30 22:49:38
+മോട്ടോർ ഘടിപ്പിച്ച യന്ത്രവൽക്കരണം സ്വീകരിച്ച പ്രദേശം കഴിഞ്ഞ ദശാബ്ദങ്ങളായി സ്തംഭിച്ചു.,സബ്-സഹാറൻ ആഫ്രിക്ക,ml,ml,5,True,2024-11-30 22:50:11
+what are the sustainable approaches to cassava disease management?,breeding disease-resistant varieties and using natural pest control methods.,en,en,5,True,2024-11-30 22:55:53
+కాసావా వ్యాధి నిర్వహణకు స్థిరమైన విధానాలు ఏమిటి?,వ్యాధి-నిరోధక రకాలను పెంపకం చేయడం మరియు సహజ తెగులు నియంత్రణ పద్ధతులను ఉపయోగించడం.,te,te,5,True,2024-11-30 22:59:13
+which other techniques can help preserve quality of beans?,The use of hermetic storage bags or containers,en,en,5,True,2024-11-30 23:00:19
+బీన్స్ నాణ్యతను సంరక్షించడానికి ఏ ఇతర పద్ధతులు సహాయపడతాయి?,హెర్మెటిక్ నిల్వ సంచులు లేదా కంటైనర్ల ఉపయోగం,te,te,5,True,2024-11-30 23:00:53
+మెచ్యూరిటీ వివాదం వర్షం అందుబాటులోకి రాకముందే బీన్స్ ఎందుకు పసుపు రంగులోకి మారుతుంది,"పోషకాల లోపం: బీన్స్‌లో తగినంత పోషకాలు, ముఖ్యంగా నత్రజని అందకపోతే, వాటి ఆకులు పసుపు రంగులోకి మారుతాయి. మట్టి పరీక్ష పోషకాల లోపం ఉన్నట్లయితే గుర్తించడంలో సహాయపడుతుంది.",te,te,5,True,2024-11-30 23:02:04
+సింథటిక్ ఎరువులు మితిమీరి వాడటం వల్ల ఇలా జరుగుతుందా?,"నేల క్షీణత, పోషకాల క్షీణత, సేంద్రియ పదార్థం తగ్గడం మరియు నేల ఆమ్లత్వం పెరగడం",te,te,5,True,2024-11-30 23:03:07
+സൈലേജിനായി ഏറ്റവും കൂടുതൽ ഉപയോഗിക്കുന്ന വിള ഏതാണ്.,ചോളം,ml,ml,5,True,2024-11-30 23:04:18
+ജൈവ ഉൽപാദനത്തിൽ അനുവദനീയമായ സിന്തറ്റിക് പദാർത്ഥങ്ങൾ.,"ക്ലോറിൻ, ഹൈഡ്രജൻ പെറോക്സൈഡ്",ml,ml,5,True,2024-11-30 23:05:19

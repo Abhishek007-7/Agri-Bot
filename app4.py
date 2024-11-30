@@ -14,7 +14,7 @@ import datetime
 # Load preprocessed embeddings and data
 @st.cache_data
 def load_data():
-    load_path = r'D:\YEAR 4\SEM 7\NLP\LAB\PROJECT\codes\Saved_state\embeddings.pkl'
+    load_path = r'Saved_state/embeddings.pkl'
     with open(load_path, 'rb') as f:
         question_embeddings, data = pickle.load(f)
     return question_embeddings, data
@@ -72,7 +72,7 @@ def generate_speech(text, lang_code):
 
 def save_interaction_to_csv(question, answer, detected_lang, actual_lang, relevance_score, correct_output, timestamp):
     """Log the interaction to a CSV file."""
-    csv_path = r'D:\YEAR 4\SEM 7\NLP\LAB\PROJECT\codes\conversation_logs.csv'
+    csv_path = r'conversation_logs.csv'
     df = pd.DataFrame([{
         'Question': question,
         'Answer': answer,

@@ -35,18 +35,22 @@ def get_embedding(text):
 
 def translate_text(text, src_lang, dest_lang='en'):
     """Translate text between specified source and destination languages using Deep Translate."""
-    if src_lang != dest_lang:
-        try:
-            return GoogleTranslator(source=src_lang, target=dest_lang).translate(text)
-        except Exception as e:
-            st.error(f"Translation Error: {e}")
-            return text
-    return text
+    if src_lang == dest_lang:
+        # No translation needed if source and destination languages are the same
+        return text
+
+    try:
+        # Perform translation only if source and destination languages differ
+        translated_text = GoogleTranslator(source=src_lang, target=dest_lang).translate(text)
+        return translated_text
+    except Exception as e:
+        st.error(f"Translation Error: {e}")
+        return text  # Return original text if translation fails
 
 def find_closest_question_and_answer(query, src_lang):
     """Find the closest matching question and corresponding answer."""
     
-    # Translate the query to English
+    # Translate the query to English if needed
     query_eng = translate_text(query, src_lang)
     
     # Generate embedding and calculate cosine similarity
@@ -103,7 +107,8 @@ def main():
 
 def handle_conversation(question):
     """Handle user input and generate a response."""
-    detected_lang = detect(question)
+    detected_lang = detect(question)  # Detect the input language
+    st.write(f"Detected language: {detected_lang}")  # Debug: Log the detected language
     src_lang_code = detected_lang
 
     # Find the closest question and corresponding answer

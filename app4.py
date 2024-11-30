@@ -1,8 +1,44 @@
+import pandas as pd
+import torch
+from transformers import AutoTokenizer, AutoModel
+from tqdm import tqdm
+import pickle
+
+# Initialize and load the tokenizer and model
+tokenizer = AutoTokenizer.from_pretrained('sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2')
+model = AutoModel.from_pretrained('sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2')
+
+def get_embedding(text):
+    with torch.no_grad():
+        inputs = tokenizer(text, return_tensors='pt', padding=True, truncation=True, max_length=128)
+        outputs = model(**inputs)
+        embeddings = outputs.last_hidden_state.mean(1)
+    return embeddings.cpu().numpy()
+
+# Load the dataset
+dataset_path = r'D:\YEAR 4\SEM 7\NLP\LAB\PROJECT\codes\datasets\agri.csv'
+data = pd.read_csv(dataset_path)
+
+# Generate embeddings
+question_embeddings = {}
+for index, row in tqdm(data.iterrows(), total=data.shape[0], desc="Generating Embeddings"):
+    question_embeddings[row['question']] = get_embedding(row['question'])
+
+# Save embeddings and questions to disk
+save_path = r'D:\YEAR 4\SEM 7\NLP\LAB\PROJECT\codes\Saved_state\embeddings.pkl'
+with open(save_path, 'wb') as f:
+    pickle.dump((question_embeddings, data), f)
+
+print("Preprocessing complete and state saved.")
+
+
+--------------------------------------------
+
 import streamlit as st
 import torch
 from transformers import AutoTokenizer, AutoModel
 from langdetect import detect
-from deep_translator import GoogleTranslator
+from deep_translator import GoogleTranslator  # Using Deep Translate (GoogleTranslator)
 from sklearn.metrics.pairwise import cosine_similarity
 from gtts import gTTS
 import pickle
@@ -10,53 +46,54 @@ import os
 import uuid
 import pandas as pd
 import datetime
-import numpy as np
 
-# Load preprocessed embeddings and data with caching
+# Load preprocessed embeddings and data
 @st.cache_data
 def load_data():
-    load_path = r'Saved_state/embeddings.pkl'
+    load_path = r'D:\YEAR 4\SEM 7\NLP\LAB\PROJECT\codes\Saved_state\embeddings.pkl'
     with open(load_path, 'rb') as f:
         question_embeddings, data = pickle.load(f)
-    # Reduce precision to save memory
-    question_embeddings = {q: np.float16(emb) for q, emb in question_embeddings.items()}
     return question_embeddings, data
 
 question_embeddings, data = load_data()
 
-# Load lightweight multilingual model for embedding generation
-tokenizer = AutoTokenizer.from_pretrained('sentence-transformers/paraphrase-MiniLM-L6-v2')  # Lighter model
-model = AutoModel.from_pretrained('sentence-transformers/paraphrase-MiniLM-L6-v2')
+# Load multilingual model for embedding generation
+tokenizer = AutoTokenizer.from_pretrained('sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2')
+model = AutoModel.from_pretrained('sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2')
 
 def get_embedding(text):
     """Generate an embedding for a given text."""
     with torch.no_grad():
         inputs = tokenizer(text, return_tensors='pt', padding=True, truncation=True, max_length=128)
         outputs = model(**inputs)
-        embeddings = outputs.last_hidden_state.mean(1).cpu().numpy()
+        embeddings = outputs.last_hidden_state.mean(1)
     return embeddings
 
 def translate_text(text, src_lang, dest_lang='en'):
-    """Translate text between specified source and destination languages."""
-    if src_lang == dest_lang:
-        return text  # No translation needed
-    try:
-        return GoogleTranslator(source=src_lang, target=dest_lang).translate(text)
-    except Exception as e:
-        st.error(f"Translation Error: {e}")
-        return text
+    """Translate text between specified source and destination languages using Deep Translate."""
+    if src_lang != dest_lang:
+        try:
+            return GoogleTranslator(source=src_lang, target=dest_lang).translate(text)
+        except Exception as e:
+            st.error(f"Translation Error: {e}")
+            return text
+    return text
 
 def find_closest_question_and_answer(query, src_lang):
     """Find the closest matching question and corresponding answer."""
+    
+    # Translate the query to English
     query_eng = translate_text(query, src_lang)
+    
+    # Generate embedding and calculate cosine similarity
     query_emb = get_embedding(query_eng)
-    similarities = {q: cosine_similarity(query_emb, emb.reshape(1, -1)).flatten()[0] for q, emb in question_embeddings.items()}
+    similarities = {q: cosine_similarity(query_emb, emb).flatten()[0] for q, emb in question_embeddings.items()}
     closest_question_eng = max(similarities, key=similarities.get)
-
+    
     # Retrieve the answer in English
     answer_eng = data[data['question'] == closest_question_eng]['answers'].iloc[0]
-
-    # Translate back to the original language
+    
+    # Translate closest question and answer back to the original language
     closest_question = translate_text(closest_question_eng, 'en', src_lang)
     answer = translate_text(answer_eng, 'en', src_lang)
     
@@ -71,7 +108,7 @@ def generate_speech(text, lang_code):
 
 def save_interaction_to_csv(question, answer, detected_lang, actual_lang, relevance_score, correct_output, timestamp):
     """Log the interaction to a CSV file."""
-    csv_path = r'conversation_logs.csv'
+    csv_path = r'D:\YEAR 4\SEM 7\NLP\LAB\PROJECT\codes\conversation_logs.csv'
     df = pd.DataFrame([{
         'Question': question,
         'Answer': answer,
@@ -84,37 +121,44 @@ def save_interaction_to_csv(question, answer, detected_lang, actual_lang, releva
     df.to_csv(csv_path, mode='a', header=not os.path.exists(csv_path), index=False)
 
 def main():
-    st.title("💬 Agricultural Chatbot (Optimized)")
+    st.title("💬 Agricultural Chatbot")
 
+    # Initialize session state for conversations
     if "messages" not in st.session_state:
         st.session_state["messages"] = []
 
+    # Display previous messages in chat-style format
     for msg in st.session_state["messages"]:
         st.chat_message(msg["role"]).write(msg["content"])
         if "audio_file" in msg and os.path.exists(msg["audio_file"]):
             st.audio(msg["audio_file"])
 
+    # Input box for user questions
     if question := st.chat_input("Ask me anything about agriculture:"):
         handle_conversation(question)
 
 def handle_conversation(question):
     """Handle user input and generate a response."""
     detected_lang = detect(question)
-    st.write(f"Detected language: {detected_lang}")
     src_lang_code = detected_lang
 
+    # Find the closest question and corresponding answer
     closest_question, answer = find_closest_question_and_answer(question, src_lang_code)
     audio_file = generate_speech(answer, src_lang_code)
 
+    # Append the user's message to the session state
     st.session_state["messages"].append({"role": "user", "content": question})
     st.chat_message("user").write(question)
 
+    # Append the bot's response to the session state, including the audio file
     st.session_state["messages"].append({"role": "assistant", "content": answer, "audio_file": audio_file})
     st.chat_message("assistant").write(answer)
 
+    # Display the generated audio
     if os.path.exists(audio_file):
         st.audio(audio_file)
 
+    # Save interaction to CSV
     save_interaction_to_csv(
         question, answer, detected_lang, detected_lang, 5, True, datetime.datetime.now()
     )

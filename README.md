@@ -1,67 +1,79 @@
+# 🌾 Agricultural Chatbot
 
+This project is an interactive multilingual chatbot designed to provide answers to agricultural queries. It uses state-of-the-art NLP techniques, including embeddings from the `sentence-transformers` model, to find the closest matching question from a dataset and generate responses. The chatbot also supports language detection, translation, and speech synthesis for enhanced usability.
 
-```markdown
+---
+
+## 📋 Features
+
+- **Multilingual Support**: Automatically detects the input language and provides answers in the same language using translation.
+- **Question Similarity Matching**: Uses embeddings and cosine similarity to find the most relevant answer from the dataset.
+- **Text-to-Speech**: Converts answers into audio for improved accessibility.
+- **Logging**: Saves user interactions and their responses for future analysis.
+- **Streamlit-Based UI**: A user-friendly web interface powered by Streamlit.
+
+---
+
+## 🛠️ Tech Stack
+
+- **Python**: Programming language
+- **Streamlit**: Web application framework
+- **Transformers**: For embedding generation
+- **Deep Translator**: For text translation
+- **Google Text-to-Speech (gTTS)**: For speech synthesis
+- **pandas**: For data handling
+- **scikit-learn**: For cosine similarity computation
+- **PyTorch**: Deep learning framework
+
+---
+
 ## 📂 Project Structure
 
-```
-project/
-│
-├── app.py                       # Main Streamlit application
-├── datasets/
-│   └── agri.csv                 # Dataset containing agricultural questions and answers
-├── Saved_state/
-│   └── embeddings.pkl           # Preprocessed question embeddings
-├── conversation_logs.csv        # Logs of user interactions
-├── requirements.txt             # Python dependencies
-└── README.md                    # Project documentation
-```
+project/ │ ├── app.py # Main Streamlit application ├── datasets/ │ └── agri.csv # Dataset containing agricultural questions and answers ├── Saved_state/ │ └── embeddings.pkl # Preprocessed question embeddings ├── conversation_logs.csv # Logs of user interactions ├── requirements.txt # Python dependencies └── README.md # Project documentation
+
+yaml
+Copy code
 
 ---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-
 - Python 3.8 or higher
 - Internet connection for downloading models and using translation services
 
 ### Installation
 
-1. **Clone the repository:**
+1. Clone the repository:
    ```bash
    git clone https://github.com/your-username/agricultural-chatbot.git
    cd agricultural-chatbot
-   ```
+Install dependencies:
 
-2. **Install dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
+bash
+Copy code
+pip install -r requirements.txt
+(Optional) Install system dependencies for deployment: Create a packages.txt file with the following content:
 
-3. **(Optional) Install system dependencies for deployment:**
-   Create a `packages.txt` file with the following content:
-   ```plaintext
-   libglib2.0-0
-   libsm6
-   libxrender1
-   libxext6
-   ```
-   Use this file in deployment platforms like Streamlit Cloud if needed.
+plaintext
+Copy code
+libglib2.0-0
+libsm6
+libxrender1
+libxext6
+Then, use it in deployment platforms like Streamlit Cloud.
 
-4. **Preprocess the dataset:**
-   Run the preprocessing script to generate embeddings:
-   ```bash
-   python preprocess.py
-   ```
+Preprocess the dataset: Run the preprocessing script to generate embeddings:
 
-5. **Launch the chatbot:**
-   ```bash
-   streamlit run app.py
-   ```
+bash
+Copy code
+python preprocess.py
+Launch the chatbot:
 
----
+bash
+Copy code
+streamlit run app.py
 
----
 
 ## 🗂️ Dataset
 

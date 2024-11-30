@@ -32,7 +32,6 @@ This project is an interactive multilingual chatbot designed to provide answers 
 project/ │ ├── app.py # Main Streamlit application ├── datasets/ │ └── agri.csv # Dataset containing agricultural questions and answers ├── Saved_state/ │ └── embeddings.pkl # Preprocessed question embeddings ├── conversation_logs.csv # Logs of user interactions ├── requirements.txt # Python dependencies └── README.md # Project documentation
 
 yaml
-Copy code
 
 ---
 

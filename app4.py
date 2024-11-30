@@ -1,39 +1,3 @@
-import pandas as pd
-import torch
-from transformers import AutoTokenizer, AutoModel
-from tqdm import tqdm
-import pickle
-
-# Initialize and load the tokenizer and model
-tokenizer = AutoTokenizer.from_pretrained('sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2')
-model = AutoModel.from_pretrained('sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2')
-
-def get_embedding(text):
-    with torch.no_grad():
-        inputs = tokenizer(text, return_tensors='pt', padding=True, truncation=True, max_length=128)
-        outputs = model(**inputs)
-        embeddings = outputs.last_hidden_state.mean(1)
-    return embeddings.cpu().numpy()
-
-# Load the dataset
-dataset_path = r'D:\YEAR 4\SEM 7\NLP\LAB\PROJECT\codes\datasets\agri.csv'
-data = pd.read_csv(dataset_path)
-
-# Generate embeddings
-question_embeddings = {}
-for index, row in tqdm(data.iterrows(), total=data.shape[0], desc="Generating Embeddings"):
-    question_embeddings[row['question']] = get_embedding(row['question'])
-
-# Save embeddings and questions to disk
-save_path = r'D:\YEAR 4\SEM 7\NLP\LAB\PROJECT\codes\Saved_state\embeddings.pkl'
-with open(save_path, 'wb') as f:
-    pickle.dump((question_embeddings, data), f)
-
-print("Preprocessing complete and state saved.")
-
-
---------------------------------------------
-
 import streamlit as st
 import torch
 from transformers import AutoTokenizer, AutoModel
@@ -50,7 +14,7 @@ import datetime
 # Load preprocessed embeddings and data
 @st.cache_data
 def load_data():
-    load_path = r'D:\YEAR 4\SEM 7\NLP\LAB\PROJECT\codes\Saved_state\embeddings.pkl'
+    load_path = r'Saved_state/embeddings.pkl'
     with open(load_path, 'rb') as f:
         question_embeddings, data = pickle.load(f)
     return question_embeddings, data
@@ -108,7 +72,7 @@ def generate_speech(text, lang_code):
 
 def save_interaction_to_csv(question, answer, detected_lang, actual_lang, relevance_score, correct_output, timestamp):
     """Log the interaction to a CSV file."""
-    csv_path = r'D:\YEAR 4\SEM 7\NLP\LAB\PROJECT\codes\conversation_logs.csv'
+    csv_path = r'conversation_logs.csv'
     df = pd.DataFrame([{
         'Question': question,
         'Answer': answer,

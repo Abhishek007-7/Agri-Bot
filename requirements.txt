@@ -8,3 +8,4 @@ scikit-learn
 pandas
 tqdm
 gspread
+oauth2client

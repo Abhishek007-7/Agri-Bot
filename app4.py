@@ -2,7 +2,7 @@ import streamlit as st
 import torch
 from transformers import AutoTokenizer, AutoModel
 from langdetect import detect
-from deep_translator import GoogleTranslator  # Using Deep Translate (GoogleTranslator)
+from deep_translator import GoogleTranslator
 from sklearn.metrics.pairwise import cosine_similarity
 from gtts import gTTS
 import pickle
@@ -12,7 +12,7 @@ import pandas as pd
 import datetime
 
 # Load preprocessed embeddings and data
-@st.cache_data
+@st.cache(allow_output_mutation=True)
 def load_data():
     load_path = r'Saved_state/embeddings.pkl'
     with open(load_path, 'rb') as f:
@@ -31,7 +31,7 @@ def get_embedding(text):
         inputs = tokenizer(text, return_tensors='pt', padding=True, truncation=True, max_length=128)
         outputs = model(**inputs)
         embeddings = outputs.last_hidden_state.mean(1)
-    return embeddings
+    return embeddings.cpu().numpy()
 
 def translate_text(text, src_lang, dest_lang='en'):
     """Translate text between specified source and destination languages."""
@@ -48,11 +48,11 @@ def find_closest_question_and_answer(query, src_lang):
     """Find the closest matching question and corresponding answer."""
     
     # Translate the query to English if needed
-    query_eng = translate_text(query, src_lang, dest_lang='en')
+    query_eng = translate_text(query, src_lang, 'en')
     
     # Generate embedding and calculate cosine similarity
     query_emb = get_embedding(query_eng)
-    similarities = {q: cosine_similarity(query_emb, emb).flatten()[0] for q, emb in question_embeddings.items()}
+    similarities = {q: cosine_similarity(query_emb.reshape(1, -1), emb.reshape(1, -1)).flatten()[0] for q, emb in question_embeddings.items()}
     closest_question_eng = max(similarities, key=similarities.get)
     
     # Retrieve the answer in English
@@ -110,8 +110,8 @@ def handle_conversation(question):
     # Log the detected language for debugging purposes
     print(f"Detected Language: {detected_lang}")  # Use print for console or adjust for your logging mechanism
     
-    # Enforce English if the detected language is uncertain or incorrectly German
-    if detected_lang == 'de' or detected_lang not in ['en', 'ml']:  # Add other languages as necessary
+    # Check if the detected language is supported, else default to English
+    if detected_lang not in ['en', 'ml', 'te', 'hi', 'kn']:  # Include other language codes as necessary
         src_lang_code = 'en'
     
     # Find the closest question and corresponding answer

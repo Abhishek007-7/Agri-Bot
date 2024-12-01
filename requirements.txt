@@ -7,3 +7,4 @@ gtts
 scikit-learn
 pandas
 tqdm
+gspread

@@ -59,15 +59,20 @@ def translate_text(text, src_lang, dest_lang='en'):
         st.error(f"Translation Error: {e}")
         return text
 
-def find_closest_question_and_answer(query, src_lang):
+def find_closest_question_and_answer(query, src_lang, threshold=0.7):
     query_eng = translate_text(query, src_lang, 'en')
     query_emb = get_embedding(query_eng)
     similarities = {q: cosine_similarity(query_emb.reshape(1, -1), emb.reshape(1, -1)).flatten()[0] for q, emb in question_embeddings.items()}
-    closest_question_eng = max(similarities, key=similarities.get)
+    
+    closest_question_eng, max_similarity = max(similarities.items(), key=lambda x: x[1])
+    
+    if max_similarity < threshold:
+        return None, None, max_similarity
+    
     answer_eng = data[data['question'] == closest_question_eng]['answers'].iloc[0]
     closest_question = translate_text(closest_question_eng, 'en', src_lang)
     answer = translate_text(answer_eng, 'en', src_lang)
-    return closest_question, answer
+    return closest_question, answer, max_similarity
 
 def generate_speech(text, lang_code):
     tts = gTTS(text=text, lang=lang_code)
@@ -93,15 +98,27 @@ def main():
 def handle_conversation(question):
     detected_lang = detect(question)
     src_lang_code = detected_lang if detected_lang in ['en', 'ml', 'te', 'hi', 'kn'] else 'en'
-    closest_question, answer = find_closest_question_and_answer(question, src_lang_code)
-    audio_file = generate_speech(answer, src_lang_code)
-    st.session_state["messages"].append({"role": "user", "content": question})
-    st.chat_message("user").write(question)
-    st.session_state["messages"].append({"role": "assistant", "content": answer, "audio_file": audio_file})
-    st.chat_message("assistant").write(answer)
-    if os.path.exists(audio_file):
-        st.audio(audio_file)
-    log_interaction_to_sheet(question, answer, detected_lang, src_lang_code, 5, True, datetime.datetime.now())
+    closest_question, answer, similarity = find_closest_question_and_answer(question, src_lang_code)
+
+    if closest_question is None:
+        answer = "I'm sorry, I couldn't find an answer to your question in my dataset."
+        audio_file = generate_speech(answer, src_lang_code)
+        st.session_state["messages"].append({"role": "user", "content": question})
+        st.chat_message("user").write(question)
+        st.session_state["messages"].append({"role": "assistant", "content": answer, "audio_file": audio_file})
+        st.chat_message("assistant").write(answer)
+        if os.path.exists(audio_file):
+            st.audio(audio_file)
+        log_interaction_to_sheet(question, answer, detected_lang, src_lang_code, similarity, False, datetime.datetime.now())
+    else:
+        audio_file = generate_speech(answer, src_lang_code)
+        st.session_state["messages"].append({"role": "user", "content": question})
+        st.chat_message("user").write(question)
+        st.session_state["messages"].append({"role": "assistant", "content": answer, "audio_file": audio_file})
+        st.chat_message("assistant").write(answer)
+        if os.path.exists(audio_file):
+            st.audio(audio_file)
+        log_interaction_to_sheet(question, answer, detected_lang, src_lang_code, similarity, True, datetime.datetime.now())
 
 if __name__ == "__main__":
     main()

@@ -30,9 +30,10 @@ model = AutoModel.from_pretrained('sentence-transformers/paraphrase-multilingual
 
 # Initialize the Google Sheets API client
 def init_gspread():
-    scope = ['https://spreadsheets.google.com/feeds','https://www.googleapis.com/auth/drive']
+    scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
     creds_json = os.getenv('GOOGLE_APPLICATION_CREDENTIALS_JSON')
     if not creds_json:
+        st.error("Google credentials environment variable is not set. Check Streamlit secrets.")
         raise Exception("Google credentials environment variable is not set.")
     creds_dict = json.loads(creds_json)
     creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
@@ -42,7 +43,6 @@ def init_gspread():
 sheet = init_gspread()
 
 def get_embedding(text):
-    """Generate an embedding for a given text."""
     with torch.no_grad():
         inputs = tokenizer(text, return_tensors='pt', padding=True, truncation=True, max_length=128)
         outputs = model(**inputs)
@@ -50,18 +50,16 @@ def get_embedding(text):
     return embeddings.cpu().numpy()
 
 def translate_text(text, src_lang, dest_lang='en'):
-    """Translate text between specified source and destination languages."""
     if src_lang == dest_lang:
-        return text  # No translation needed
+        return text
     try:
         translated_text = GoogleTranslator(source=src_lang, target=dest_lang).translate(text)
         return translated_text
     except Exception as e:
         st.error(f"Translation Error: {e}")
-        return text  # Return original text if translation fails
+        return text
 
 def find_closest_question_and_answer(query, src_lang):
-    """Find the closest matching question and corresponding answer."""
     query_eng = translate_text(query, src_lang, 'en')
     query_emb = get_embedding(query_eng)
     similarities = {q: cosine_similarity(query_emb.reshape(1, -1), emb.reshape(1, -1)).flatten()[0] for q, emb in question_embeddings.items()}
@@ -72,14 +70,12 @@ def find_closest_question_and_answer(query, src_lang):
     return closest_question, answer
 
 def generate_speech(text, lang_code):
-    """Generate a speech audio file for the given text."""
     tts = gTTS(text=text, lang=lang_code)
     unique_filename = f"speech_{uuid.uuid4().hex}.mp3"
     tts.save(unique_filename)
     return unique_filename
 
 def log_interaction_to_sheet(question, answer, detected_lang, actual_lang, relevance_score, correct_output, timestamp):
-    """Log the interaction to Google Sheets."""
     data = [question, answer, detected_lang, actual_lang, relevance_score, correct_output, timestamp.strftime('%Y-%m-%d %H:%M:%S')]
     sheet.append_row(data)
 

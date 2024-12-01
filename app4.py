@@ -105,28 +105,34 @@ def main():
 def handle_conversation(question):
     """Handle user input and generate a response."""
     detected_lang = detect(question)
-    st.write(f"Detected language: {detected_lang}")  # Log the detected language
     src_lang_code = detected_lang
-
+    
+    # Print or log the detected language for debugging
+    st.write(f"Detected Language: {detected_lang}")
+    
+    # Enforce English if the detected language is uncertain or incorrectly German
+    if detected_lang == 'de' or detected_lang not in ['en', 'ml']:  # Add other languages as necessary
+        src_lang_code = 'en'
+    
     # Find the closest question and corresponding answer
     closest_question, answer = find_closest_question_and_answer(question, src_lang_code)
     audio_file = generate_speech(answer, src_lang_code)
-
+    
     # Append the user's message to the session state
     st.session_state["messages"].append({"role": "user", "content": question})
     st.chat_message("user").write(question)
-
+    
     # Append the bot's response to the session state, including the audio file
     st.session_state["messages"].append({"role": "assistant", "content": answer, "audio_file": audio_file})
     st.chat_message("assistant").write(answer)
-
+    
     # Display the generated audio
     if os.path.exists(audio_file):
         st.audio(audio_file)
-
+    
     # Save interaction to CSV
     save_interaction_to_csv(
-        question, answer, detected_lang, detected_lang, 5, True, datetime.datetime.now()
+        question, answer, detected_lang, src_lang_code, 5, True, datetime.datetime.now()
     )
 
 if __name__ == "__main__":

@@ -31,10 +31,13 @@ model = AutoModel.from_pretrained('sentence-transformers/paraphrase-multilingual
 # Initialize the Google Sheets API client
 def init_gspread():
     scope = ['https://spreadsheets.google.com/feeds','https://www.googleapis.com/auth/drive']
-    creds_dict = json.loads(os.getenv('GOOGLE_APPLICATION_CREDENTIALS_JSON'))
+    creds_json = os.getenv('GOOGLE_APPLICATION_CREDENTIALS_JSON')
+    if not creds_json:
+        raise Exception("Google credentials environment variable is not set.")
+    creds_dict = json.loads(creds_json)
     creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
     client = gspread.authorize(creds)
-    return client.open("conversation_logs").sheet1
+    return client.open_by_key("1lAoDNeUYgwyYl0oYkRivu3hJSlrDrYgifMySC043Rw4").sheet1
 
 sheet = init_gspread()
 

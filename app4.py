@@ -10,6 +10,8 @@ import os
 import uuid
 import pandas as pd
 import datetime
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 
 # Load preprocessed embeddings and data
 @st.cache(allow_output_mutation=True)
@@ -24,6 +26,15 @@ question_embeddings, data = load_data()
 # Load multilingual model for embedding generation
 tokenizer = AutoTokenizer.from_pretrained('sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2')
 model = AutoModel.from_pretrained('sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2')
+
+# Initialize the Google Sheets API client
+def init_gspread():
+    scope = ['https://spreadsheets.google.com/feeds','https://www.googleapis.com/auth/drive']
+    creds = ServiceAccountCredentials.from_json_keyfile_name('path_to_your_service_account_key.json', scope)
+    client = gspread.authorize(creds)
+    return client.open("Your Google Sheet Name").sheet1
+
+sheet = init_gspread()
 
 def get_embedding(text):
     """Generate an embedding for a given text."""
@@ -46,22 +57,13 @@ def translate_text(text, src_lang, dest_lang='en'):
 
 def find_closest_question_and_answer(query, src_lang):
     """Find the closest matching question and corresponding answer."""
-    
-    # Translate the query to English if needed
     query_eng = translate_text(query, src_lang, 'en')
-    
-    # Generate embedding and calculate cosine similarity
     query_emb = get_embedding(query_eng)
     similarities = {q: cosine_similarity(query_emb.reshape(1, -1), emb.reshape(1, -1)).flatten()[0] for q, emb in question_embeddings.items()}
     closest_question_eng = max(similarities, key=similarities.get)
-    
-    # Retrieve the answer in English
     answer_eng = data[data['question'] == closest_question_eng]['answers'].iloc[0]
-    
-    # Translate back to the original language if necessary
     closest_question = translate_text(closest_question_eng, 'en', src_lang)
     answer = translate_text(answer_eng, 'en', src_lang)
-    
     return closest_question, answer
 
 def generate_speech(text, lang_code):
@@ -71,69 +73,34 @@ def generate_speech(text, lang_code):
     tts.save(unique_filename)
     return unique_filename
 
-def save_interaction_to_csv(question, answer, detected_lang, actual_lang, relevance_score, correct_output, timestamp):
-    """Log the interaction to a CSV file."""
-    csv_path = r'conversation_logs.csv'
-    df = pd.DataFrame([{
-        'Question': question,
-        'Answer': answer,
-        'Detected Language': detected_lang,
-        'Actual Language': actual_lang,
-        'Relevance Score': relevance_score,
-        'Correct Output': correct_output,
-        'Timestamp': timestamp.strftime('%Y-%m-%d %H:%M:%S')
-    }])
-    df.to_csv(csv_path, mode='a', header=not os.path.exists(csv_path), index=False)
+def log_interaction_to_sheet(question, answer, detected_lang, actual_lang, relevance_score, correct_output, timestamp):
+    """Log the interaction to Google Sheets."""
+    data = [question, answer, detected_lang, actual_lang, relevance_score, correct_output, timestamp.strftime('%Y-%m-%d %H:%M:%S')]
+    sheet.append_row(data)
 
 def main():
     st.title("💬 Agricultural Chatbot")
-
-    # Initialize session state for conversations
     if "messages" not in st.session_state:
         st.session_state["messages"] = []
-
-    # Display previous messages in chat-style format
     for msg in st.session_state["messages"]:
         st.chat_message(msg["role"]).write(msg["content"])
         if "audio_file" in msg and os.path.exists(msg["audio_file"]):
             st.audio(msg["audio_file"])
-
-    # Input box for user questions
     if question := st.chat_input("Ask me anything about agriculture:"):
         handle_conversation(question)
 
 def handle_conversation(question):
-    """Handle user input and generate a response."""
     detected_lang = detect(question)
-    src_lang_code = detected_lang
-    
-    # Log the detected language for debugging purposes
-    print(f"Detected Language: {detected_lang}")  # Use print for console or adjust for your logging mechanism
-    
-    # Check if the detected language is supported, else default to English
-    if detected_lang not in ['en', 'ml', 'te', 'hi', 'kn']:  # Include other language codes as necessary
-        src_lang_code = 'en'
-    
-    # Find the closest question and corresponding answer
+    src_lang_code = detected_lang if detected_lang in ['en', 'ml', 'te', 'hi', 'kn'] else 'en'
     closest_question, answer = find_closest_question_and_answer(question, src_lang_code)
     audio_file = generate_speech(answer, src_lang_code)
-    
-    # Append the user's message to the session state
     st.session_state["messages"].append({"role": "user", "content": question})
     st.chat_message("user").write(question)
-    
-    # Append the bot's response to the session state, including the audio file
     st.session_state["messages"].append({"role": "assistant", "content": answer, "audio_file": audio_file})
     st.chat_message("assistant").write(answer)
-    
-    # Display the generated audio
     if os.path.exists(audio_file):
         st.audio(audio_file)
-    
-    # Save interaction to CSV
-    save_interaction_to_csv(
-        question, answer, detected_lang, src_lang_code, 5, True, datetime.datetime.now()
-    )
+    log_interaction_to_sheet(question, answer, detected_lang, src_lang_code, 5, True, datetime.datetime.now())
 
 if __name__ == "__main__":
     main()

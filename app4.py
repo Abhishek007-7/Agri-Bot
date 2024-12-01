@@ -81,7 +81,13 @@ def generate_speech(text, lang_code):
     return unique_filename
 
 def log_interaction_to_sheet(question, answer, detected_lang, actual_lang, relevance_score, correct_output, timestamp):
-    data = [question, answer, detected_lang, actual_lang, relevance_score, correct_output, timestamp.strftime('%Y-%m-%d %H:%M:%S')]
+    # Ensure all values are serializable
+    answer = answer if answer is not None else "N/A"
+    relevance_score = relevance_score if relevance_score is not None else 0
+    correct_output = str(correct_output)  # Convert boolean to string
+    timestamp_str = timestamp.strftime('%Y-%m-%d %H:%M:%S')  # Format datetime as string
+
+    data = [question, answer, detected_lang, actual_lang, relevance_score, correct_output, timestamp_str]
     sheet.append_row(data)
 
 def main():

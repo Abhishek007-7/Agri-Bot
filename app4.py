@@ -34,20 +34,21 @@ def get_embedding(text):
     return embeddings
 
 def translate_text(text, src_lang, dest_lang='en'):
-    """Translate text between specified source and destination languages using Deep Translate."""
-    if src_lang != dest_lang:
-        try:
-            return GoogleTranslator(source=src_lang, target=dest_lang).translate(text)
-        except Exception as e:
-            st.error(f"Translation Error: {e}")
-            return text
-    return text
+    """Translate text between specified source and destination languages."""
+    if src_lang == dest_lang:
+        return text  # No translation needed
+    try:
+        translated_text = GoogleTranslator(source=src_lang, target=dest_lang).translate(text)
+        return translated_text
+    except Exception as e:
+        st.error(f"Translation Error: {e}")
+        return text  # Return original text if translation fails
 
 def find_closest_question_and_answer(query, src_lang):
     """Find the closest matching question and corresponding answer."""
     
-    # Translate the query to English
-    query_eng = translate_text(query, src_lang)
+    # Translate the query to English if needed
+    query_eng = translate_text(query, src_lang, dest_lang='en')
     
     # Generate embedding and calculate cosine similarity
     query_emb = get_embedding(query_eng)
@@ -57,7 +58,7 @@ def find_closest_question_and_answer(query, src_lang):
     # Retrieve the answer in English
     answer_eng = data[data['question'] == closest_question_eng]['answers'].iloc[0]
     
-    # Translate closest question and answer back to the original language
+    # Translate back to the original language if necessary
     closest_question = translate_text(closest_question_eng, 'en', src_lang)
     answer = translate_text(answer_eng, 'en', src_lang)
     
@@ -85,7 +86,7 @@ def save_interaction_to_csv(question, answer, detected_lang, actual_lang, releva
     df.to_csv(csv_path, mode='a', header=not os.path.exists(csv_path), index=False)
 
 def main():
-    st.title("💬 Agricultural Chatbot")
+    st.title("💬 Agricultural Chatbot (Updated)")
 
     # Initialize session state for conversations
     if "messages" not in st.session_state:
@@ -104,6 +105,7 @@ def main():
 def handle_conversation(question):
     """Handle user input and generate a response."""
     detected_lang = detect(question)
+    st.write(f"Detected language: {detected_lang}")  # Log the detected language
     src_lang_code = detected_lang
 
     # Find the closest question and corresponding answer

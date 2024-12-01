@@ -12,6 +12,7 @@ import pandas as pd
 import datetime
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+import json
 
 # Load preprocessed embeddings and data
 @st.cache(allow_output_mutation=True)
@@ -30,9 +31,10 @@ model = AutoModel.from_pretrained('sentence-transformers/paraphrase-multilingual
 # Initialize the Google Sheets API client
 def init_gspread():
     scope = ['https://spreadsheets.google.com/feeds','https://www.googleapis.com/auth/drive']
-    creds = ServiceAccountCredentials.from_json_keyfile_name('path_to_your_service_account_key.json', scope)
+    creds_dict = json.loads(os.getenv('GOOGLE_APPLICATION_CREDENTIALS_JSON'))
+    creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
     client = gspread.authorize(creds)
-    return client.open("Your Google Sheet Name").sheet1
+    return client.open("conversation_logs").sheet1
 
 sheet = init_gspread()
 

@@ -86,7 +86,7 @@ def save_interaction_to_csv(question, answer, detected_lang, actual_lang, releva
     df.to_csv(csv_path, mode='a', header=not os.path.exists(csv_path), index=False)
 
 def main():
-    st.title("💬 Agricultural Chatbot (Updated)")
+    st.title("💬 Agricultural Chatbot")
 
     # Initialize session state for conversations
     if "messages" not in st.session_state:
@@ -107,8 +107,8 @@ def handle_conversation(question):
     detected_lang = detect(question)
     src_lang_code = detected_lang
     
-    # Print or log the detected language for debugging
-    st.write(f"Detected Language: {detected_lang}")
+    # Log the detected language for debugging purposes
+    print(f"Detected Language: {detected_lang}")  # Use print for console or adjust for your logging mechanism
     
     # Enforce English if the detected language is uncertain or incorrectly German
     if detected_lang == 'de' or detected_lang not in ['en', 'ml']:  # Add other languages as necessary

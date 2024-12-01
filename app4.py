@@ -67,12 +67,12 @@ def find_closest_question_and_answer(query, src_lang, threshold=0.7):
     closest_question_eng, max_similarity = max(similarities.items(), key=lambda x: x[1])
     
     if max_similarity < threshold:
-        return None, None, max_similarity
+        return None, None, float(max_similarity)
     
     answer_eng = data[data['question'] == closest_question_eng]['answers'].iloc[0]
     closest_question = translate_text(closest_question_eng, 'en', src_lang)
     answer = translate_text(answer_eng, 'en', src_lang)
-    return closest_question, answer, max_similarity
+    return closest_question, answer, float(max_similarity)
 
 def generate_speech(text, lang_code):
     tts = gTTS(text=text, lang=lang_code)
@@ -83,7 +83,7 @@ def generate_speech(text, lang_code):
 def log_interaction_to_sheet(question, answer, detected_lang, actual_lang, relevance_score, correct_output, timestamp):
     # Ensure all values are serializable
     answer = answer if answer is not None else "N/A"
-    relevance_score = relevance_score if relevance_score is not None else 0
+    relevance_score = float(relevance_score)  # Convert float32 to Python float
     correct_output = str(correct_output)  # Convert boolean to string
     timestamp_str = timestamp.strftime('%Y-%m-%d %H:%M:%S')  # Format datetime as string
 

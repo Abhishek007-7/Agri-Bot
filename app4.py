@@ -54,13 +54,16 @@ def init_gspread():
 
 sheet = init_gspread()
 
-# Cache rows locally to batch log later
-log_buffer = []
+def log_interaction_to_sheet(data):
+    """Log a row of data to Google Sheets."""
+    sheet.append_row(data, value_input_option="RAW")
 
-def log_to_sheet():
-    if log_buffer:
-        sheet.append_rows(log_buffer, value_input_option="RAW")
-        log_buffer.clear()
+def update_feedback_in_sheet(row_number, translation_correct, feedback_rating):
+    """Update feedback fields in Google Sheets."""
+    if translation_correct:
+        sheet.update_cell(row_number, 9, translation_correct)
+    if feedback_rating:
+        sheet.update_cell(row_number, 10, feedback_rating)
 
 def get_embedding(text):
     with torch.no_grad():
@@ -100,22 +103,6 @@ def generate_speech(text, lang_code):
     tts.save(unique_filename)
     return unique_filename
 
-def log_interaction_to_buffer(question, answer, detected_lang, actual_lang, relevance_score, correct_output, response_time, fallback_used, translation_correct, feedback_rating, timestamp):
-    # Ensure all values are serializable
-    answer = answer if answer is not None else "N/A"
-    relevance_score = float(relevance_score)  # Convert float32 to Python float
-    correct_output = str(correct_output)  # Convert boolean to string
-    translation_correct = translation_correct if translation_correct else "N/A"
-    feedback_rating = feedback_rating if feedback_rating else "No Feedback"
-    timestamp_str = timestamp.strftime('%Y-%m-%d %H:%M:%S')  # Format datetime as string
-
-    row = [
-        question, answer, detected_lang, actual_lang, relevance_score,
-        correct_output, response_time, fallback_used, translation_correct,
-        feedback_rating, timestamp_str
-    ]
-    log_buffer.append(row)
-
 def main():
     st.title("💬 Agricultural Chatbot")
     if "messages" not in st.session_state:
@@ -148,7 +135,15 @@ def handle_conversation(question):
     if os.path.exists(audio_file):
         st.audio(audio_file)
 
-    # Collect feedback from the user
+    # Log the interaction immediately
+    timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    row_data = [
+        question, answer, detected_lang, src_lang_code, similarity, not fallback_used,
+        response_time, fallback_used, "N/A", "No Feedback", timestamp
+    ]
+    log_interaction_to_sheet(row_data)
+
+    # Collect feedback
     st.write("### Feedback:")
     feedback_rating = st.radio(
         "Rate the answer (1 - Poor, 5 - Excellent):",
@@ -156,7 +151,6 @@ def handle_conversation(question):
         horizontal=True,  # Display options in a row
         key=f"feedback_rating_{uuid.uuid4().hex}"
     )
-
     feedback_rating = None if feedback_rating == "Select" else feedback_rating
 
     translation_correct = None
@@ -169,14 +163,10 @@ def handle_conversation(question):
         )
         translation_correct = None if translation_correct == "Select" else translation_correct
 
-    # Ensure feedback is logged after user action
+    # Update feedback in the sheet
     if feedback_rating or translation_correct:
-        log_interaction_to_buffer(
-            question, answer, detected_lang, src_lang_code, similarity, not fallback_used,
-            response_time, fallback_used, translation_correct, feedback_rating,
-            datetime.datetime.now()
-        )
-        log_to_sheet()  # Commit feedback to Google Sheets
+        row_number = len(sheet.get_all_records()) + 2
+        update_feedback_in_sheet(row_number, translation_correct, feedback_rating)
 
 if __name__ == "__main__":
     main()

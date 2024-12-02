@@ -158,7 +158,8 @@ def handle_conversation(question):
     st.write("### Feedback:")
     feedback_rating = st.radio(
         "Rate the answer (1 - Poor, 5 - Excellent):",
-        options=["1", "2", "3", "4", "5"],
+        options=["Select", "1", "2", "3", "4", "5"],
+        index=0,  # "Select" is the default option
         horizontal=True,
         key=f"feedback_rating_{uuid.uuid4().hex}"
     )
@@ -167,14 +168,20 @@ def handle_conversation(question):
     if detected_lang != "en":
         translation_correct = st.radio(
             "Was the translation done correctly?",
-            options=["Yes", "No"],
+            options=["Select", "Yes", "No"],
+            index=0,  # "Select" is the default option
             horizontal=True,
             key=f"translation_correct_{uuid.uuid4().hex}"
         )
 
-    # Check if feedback was provided before updating the sheet
-    if feedback_rating != "Select" or translation_correct is not None:
-        update_feedback_in_sheet(st.session_state["row_mapping"][question], translation_correct, feedback_rating)
+    # Validate feedback before updating the sheet
+    if feedback_rating != "Select" or (translation_correct and translation_correct != "Select"):
+        update_feedback_in_sheet(
+            st.session_state["row_mapping"][question],
+            translation_correct if translation_correct != "Select" else None,
+            feedback_rating if feedback_rating != "Select" else None
+        )
+
 
 
 if __name__ == "__main__":

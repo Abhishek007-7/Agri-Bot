@@ -158,21 +158,21 @@ def handle_conversation(question):
     st.write("### Feedback:")
     feedback_rating = st.radio(
         "Rate the answer (1 - Poor, 5 - Excellent):",
-        options=["Select", "1", "2", "3", "4", "5"],
-        horizontal=True,  # Display options in a row
+        options=["1", "2", "3", "4", "5"],
+        index=-1,  # No default selection
+        horizontal=True,
         key=f"feedback_rating_{uuid.uuid4().hex}"
     )
-    feedback_rating = None if feedback_rating == "Select" else feedback_rating
 
     translation_correct = None
     if detected_lang != "en":
         translation_correct = st.radio(
             "Was the translation done correctly?",
-            options=["Select", "Yes", "No"],
-            horizontal=True,  # Display options in a row
+            options=["Yes", "No"],
+            index=-1,  # No default selection
+            horizontal=True,
             key=f"translation_correct_{uuid.uuid4().hex}"
         )
-        translation_correct = None if translation_correct == "Select" else translation_correct
 
     # Update feedback in the sheet
     if feedback_rating or translation_correct:

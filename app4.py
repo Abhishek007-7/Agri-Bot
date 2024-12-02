@@ -145,6 +145,7 @@ def handle_conversation(question):
     feedback_rating = st.radio(
         "Rate the answer (1 - Poor, 5 - Excellent):",
         options=["Select", "1", "2", "3", "4", "5"],
+        horizontal=True,  # Display options in a row
         key=f"feedback_rating_{uuid.uuid4().hex}"
     )
 
@@ -155,11 +156,13 @@ def handle_conversation(question):
         translation_correct = st.radio(
             "Was the translation done correctly?",
             options=["Select", "Yes", "No"],
+            horizontal=True,  # Display options in a row
             key=f"translation_correct_{uuid.uuid4().hex}"
         )
         translation_correct = None if translation_correct == "Select" else translation_correct
 
-    if feedback_rating or translation_correct:  # Log only if feedback is provided
+    # Ensure feedback is logged after user action
+    if feedback_rating or translation_correct:  # Wait for user feedback
         log_interaction_to_sheet(
             question, answer, detected_lang, src_lang_code, similarity, not fallback_used,
             response_time, fallback_used, translation_correct, feedback_rating,

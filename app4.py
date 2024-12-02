@@ -10,6 +10,7 @@ import os
 import uuid
 import pandas as pd
 import datetime
+import time
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import json
@@ -80,14 +81,20 @@ def generate_speech(text, lang_code):
     tts.save(unique_filename)
     return unique_filename
 
-def log_interaction_to_sheet(question, answer, detected_lang, actual_lang, relevance_score, correct_output, timestamp):
+def log_interaction_to_sheet(question, answer, detected_lang, actual_lang, relevance_score, correct_output, response_time, fallback_used, translation_correct, feedback_satisfactory, timestamp):
     # Ensure all values are serializable
     answer = answer if answer is not None else "N/A"
     relevance_score = float(relevance_score)  # Convert float32 to Python float
     correct_output = str(correct_output)  # Convert boolean to string
+    translation_correct = str(translation_correct) if translation_correct is not None else "N/A"
+    feedback_satisfactory = str(feedback_satisfactory) if feedback_satisfactory is not None else "N/A"
     timestamp_str = timestamp.strftime('%Y-%m-%d %H:%M:%S')  # Format datetime as string
 
-    data = [question, answer, detected_lang, actual_lang, relevance_score, correct_output, timestamp_str]
+    data = [
+        question, answer, detected_lang, actual_lang, relevance_score,
+        correct_output, response_time, fallback_used, translation_correct,
+        feedback_satisfactory, timestamp_str
+    ]
     sheet.append_row(data)
 
 def main():
@@ -102,29 +109,38 @@ def main():
         handle_conversation(question)
 
 def handle_conversation(question):
+    start_time = time.time()  # Record start time for response time calculation
     detected_lang = detect(question)
     src_lang_code = detected_lang if detected_lang in ['en', 'ml', 'te', 'hi', 'kn'] else 'en'
     closest_question, answer, similarity = find_closest_question_and_answer(question, src_lang_code)
 
+    fallback_used = False
     if closest_question is None:
         answer = "I'm sorry, I couldn't find an answer to your question in my dataset."
-        audio_file = generate_speech(answer, src_lang_code)
-        st.session_state["messages"].append({"role": "user", "content": question})
-        st.chat_message("user").write(question)
-        st.session_state["messages"].append({"role": "assistant", "content": answer, "audio_file": audio_file})
-        st.chat_message("assistant").write(answer)
-        if os.path.exists(audio_file):
-            st.audio(audio_file)
-        log_interaction_to_sheet(question, answer, detected_lang, src_lang_code, similarity, False, datetime.datetime.now())
-    else:
-        audio_file = generate_speech(answer, src_lang_code)
-        st.session_state["messages"].append({"role": "user", "content": question})
-        st.chat_message("user").write(question)
-        st.session_state["messages"].append({"role": "assistant", "content": answer, "audio_file": audio_file})
-        st.chat_message("assistant").write(answer)
-        if os.path.exists(audio_file):
-            st.audio(audio_file)
-        log_interaction_to_sheet(question, answer, detected_lang, src_lang_code, similarity, True, datetime.datetime.now())
+        fallback_used = True
+
+    audio_file = generate_speech(answer, src_lang_code)
+    response_time = round(time.time() - start_time, 2)  # Calculate response time
+
+    st.session_state["messages"].append({"role": "user", "content": question})
+    st.chat_message("user").write(question)
+    st.session_state["messages"].append({"role": "assistant", "content": answer, "audio_file": audio_file})
+    st.chat_message("assistant").write(answer)
+    if os.path.exists(audio_file):
+        st.audio(audio_file)
+
+    # Collect feedback from the user
+    feedback_satisfactory = st.radio("Was the answer satisfactory?", ["Yes", "No"])
+    translation_correct = None
+    if detected_lang != "en":
+        translation_correct = st.radio("Was the translation done correctly?", ["Yes", "No"])
+
+    # Log interaction
+    log_interaction_to_sheet(
+        question, answer, detected_lang, src_lang_code, similarity, not fallback_used,
+        response_time, fallback_used, translation_correct, feedback_satisfactory,
+        datetime.datetime.now()
+    )
 
 if __name__ == "__main__":
     main()

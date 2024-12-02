@@ -54,17 +54,26 @@ def init_gspread():
 
 sheet = init_gspread()
 
+# Track row mapping for interactions
+if "row_mapping" not in st.session_state:
+    st.session_state["row_mapping"] = {}
+
 def log_interaction_to_sheet(data):
-    """Log a row of data to Google Sheets."""
+    """Log a row of data to Google Sheets and return the row number."""
     sheet.append_row(data, value_input_option="RAW")
-    return len(sheet.get_all_records()) + 1  # Return the row number of the newly added row
+    row_number = len(sheet.get_all_records()) + 1  # Calculate row number
+    return row_number
 
 def update_feedback_in_sheet(row_number, translation_correct, feedback_rating):
     """Update feedback fields in Google Sheets."""
-    if translation_correct is not None:
-        sheet.update_cell(row_number, 9, translation_correct)
-    if feedback_rating is not None:
-        sheet.update_cell(row_number, 10, feedback_rating)
+    try:
+        if translation_correct:
+            sheet.update_cell(row_number, 9, translation_correct)
+        if feedback_rating:
+            sheet.update_cell(row_number, 10, feedback_rating)
+        st.success("Feedback successfully updated in the Google Sheet.")
+    except Exception as e:
+        st.error(f"Error updating feedback: {e}")
 
 def get_embedding(text):
     with torch.no_grad():
@@ -143,6 +152,7 @@ def handle_conversation(question):
         response_time, fallback_used, "N/A", "No Feedback", timestamp
     ]
     row_number = log_interaction_to_sheet(row_data)
+    st.session_state["row_mapping"][question] = row_number  # Store the row number for this question
 
     # Collect feedback
     st.write("### Feedback:")
@@ -166,7 +176,7 @@ def handle_conversation(question):
 
     # Update feedback in the sheet
     if feedback_rating or translation_correct:
-        update_feedback_in_sheet(row_number, translation_correct, feedback_rating)
+        update_feedback_in_sheet(st.session_state["row_mapping"][question], translation_correct, feedback_rating)
 
 if __name__ == "__main__":
     main()

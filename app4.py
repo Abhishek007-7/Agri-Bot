@@ -39,7 +39,18 @@ def init_gspread():
     creds_dict = json.loads(creds_json)
     creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
     client = gspread.authorize(creds)
-    return client.open_by_key("1lAoDNeUYgwyYl0oYkRivu3hJSlrDrYgifMySC043Rw4").sheet1
+    sheet = client.open_by_key("1lAoDNeUYgwyYl0oYkRivu3hJSlrDrYgifMySC043Rw4").sheet1
+
+    # Ensure headers are present for new metrics
+    headers = [
+        "Question", "Answer", "Detected Language", "Actual Language", 
+        "Relevance Score", "Correct Output", "Response Time", 
+        "Fallback Used", "Translation Correct", "Feedback Satisfactory", "Timestamp"
+    ]
+    if sheet.row_count == 0 or sheet.row_values(1) != headers:
+        sheet.insert_row(headers, 1)
+    
+    return sheet
 
 sheet = init_gspread()
 
@@ -130,10 +141,11 @@ def handle_conversation(question):
         st.audio(audio_file)
 
     # Collect feedback from the user
-    feedback_satisfactory = st.radio("Was the answer satisfactory?", ["Yes", "No"])
+    st.write("### Feedback:")
+    feedback_satisfactory = st.radio("Was the answer satisfactory?", options=["Yes", "No"], index=-1, key=f"feedback_satisfactory_{uuid.uuid4().hex}")
     translation_correct = None
     if detected_lang != "en":
-        translation_correct = st.radio("Was the translation done correctly?", ["Yes", "No"])
+        translation_correct = st.radio("Was the translation done correctly?", options=["Yes", "No"], index=-1, key=f"translation_correct_{uuid.uuid4().hex}")
 
     # Log interaction
     log_interaction_to_sheet(

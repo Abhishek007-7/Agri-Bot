@@ -57,12 +57,13 @@ sheet = init_gspread()
 def log_interaction_to_sheet(data):
     """Log a row of data to Google Sheets."""
     sheet.append_row(data, value_input_option="RAW")
+    return len(sheet.get_all_records()) + 1  # Return the row number of the newly added row
 
 def update_feedback_in_sheet(row_number, translation_correct, feedback_rating):
     """Update feedback fields in Google Sheets."""
-    if translation_correct:
+    if translation_correct is not None:
         sheet.update_cell(row_number, 9, translation_correct)
-    if feedback_rating:
+    if feedback_rating is not None:
         sheet.update_cell(row_number, 10, feedback_rating)
 
 def get_embedding(text):
@@ -135,13 +136,13 @@ def handle_conversation(question):
     if os.path.exists(audio_file):
         st.audio(audio_file)
 
-    # Log the interaction immediately
+    # Log the interaction immediately and get the row number
     timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     row_data = [
         question, answer, detected_lang, src_lang_code, similarity, not fallback_used,
         response_time, fallback_used, "N/A", "No Feedback", timestamp
     ]
-    log_interaction_to_sheet(row_data)
+    row_number = log_interaction_to_sheet(row_data)
 
     # Collect feedback
     st.write("### Feedback:")
@@ -165,7 +166,6 @@ def handle_conversation(question):
 
     # Update feedback in the sheet
     if feedback_rating or translation_correct:
-        row_number = len(sheet.get_all_records()) + 2
         update_feedback_in_sheet(row_number, translation_correct, feedback_rating)
 
 if __name__ == "__main__":

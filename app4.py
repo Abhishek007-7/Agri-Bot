@@ -45,7 +45,7 @@ def init_gspread():
     headers = [
         "Question", "Answer", "Detected Language", "Actual Language", 
         "Relevance Score", "Correct Output", "Response Time (seconds)", 
-        "Fallback Used", "Translation Correct", "Feedback Satisfactory", "Timestamp"
+        "Fallback Used", "Translation Correct", "Feedback Rating", "Timestamp"
     ]
     if sheet.row_count == 0 or sheet.row_values(1) != headers:
         sheet.insert_row(headers, 1)
@@ -92,19 +92,19 @@ def generate_speech(text, lang_code):
     tts.save(unique_filename)
     return unique_filename
 
-def log_interaction_to_sheet(question, answer, detected_lang, actual_lang, relevance_score, correct_output, response_time, fallback_used, translation_correct, feedback_satisfactory, timestamp):
+def log_interaction_to_sheet(question, answer, detected_lang, actual_lang, relevance_score, correct_output, response_time, fallback_used, translation_correct, feedback_rating, timestamp):
     # Ensure all values are serializable
     answer = answer if answer is not None else "N/A"
     relevance_score = float(relevance_score)  # Convert float32 to Python float
     correct_output = str(correct_output)  # Convert boolean to string
     translation_correct = str(translation_correct) if translation_correct is not None else "N/A"
-    feedback_satisfactory = str(feedback_satisfactory) if feedback_satisfactory else "N/A"
+    feedback_rating = feedback_rating if feedback_rating else "No Feedback"
     timestamp_str = timestamp.strftime('%Y-%m-%d %H:%M:%S')  # Format datetime as string
 
     data = [
         question, answer, detected_lang, actual_lang, relevance_score,
         correct_output, response_time, fallback_used, translation_correct,
-        feedback_satisfactory, timestamp_str
+        feedback_rating, timestamp_str
     ]
     sheet.append_row(data)
 
@@ -142,23 +142,27 @@ def handle_conversation(question):
 
     # Collect feedback from the user
     st.write("### Feedback:")
-    feedback_satisfactory = st.radio(
-        "Was the answer satisfactory?",
-        options=["Yes", "No"],  # Ensure no default selection
-        key=f"feedback_satisfactory_{uuid.uuid4().hex}"
+    feedback_rating = st.radio(
+        "Rate the answer:",
+        options=["Select", "1 - Poor", "2 - Fair", "3 - Average", "4 - Good", "5 - Excellent"],
+        key=f"feedback_rating_{uuid.uuid4().hex}"
     )
+
+    feedback_rating = None if feedback_rating == "Select" else feedback_rating.split(" - ")[0]
+
     translation_correct = None
     if detected_lang != "en":
         translation_correct = st.radio(
             "Was the translation done correctly?",
-            options=["Yes", "No"],  # Ensure no default selection
+            options=["Select", "Yes", "No"],  # Ensure no default selection
             key=f"translation_correct_{uuid.uuid4().hex}"
         )
+        translation_correct = None if translation_correct == "Select" else translation_correct
 
     # Log interaction
     log_interaction_to_sheet(
         question, answer, detected_lang, src_lang_code, similarity, not fallback_used,
-        response_time, fallback_used, translation_correct, feedback_satisfactory,
+        response_time, fallback_used, translation_correct, feedback_rating,
         datetime.datetime.now()
     )
 

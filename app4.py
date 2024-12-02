@@ -54,6 +54,14 @@ def init_gspread():
 
 sheet = init_gspread()
 
+# Cache rows locally to batch log later
+log_buffer = []
+
+def log_to_sheet():
+    if log_buffer:
+        sheet.append_rows(log_buffer, value_input_option="RAW")
+        log_buffer.clear()
+
 def get_embedding(text):
     with torch.no_grad():
         inputs = tokenizer(text, return_tensors='pt', padding=True, truncation=True, max_length=128)
@@ -92,7 +100,7 @@ def generate_speech(text, lang_code):
     tts.save(unique_filename)
     return unique_filename
 
-def log_interaction_to_sheet(question, answer, detected_lang, actual_lang, relevance_score, correct_output, response_time, fallback_used, translation_correct, feedback_rating, timestamp):
+def log_interaction_to_buffer(question, answer, detected_lang, actual_lang, relevance_score, correct_output, response_time, fallback_used, translation_correct, feedback_rating, timestamp):
     # Ensure all values are serializable
     answer = answer if answer is not None else "N/A"
     relevance_score = float(relevance_score)  # Convert float32 to Python float
@@ -101,12 +109,12 @@ def log_interaction_to_sheet(question, answer, detected_lang, actual_lang, relev
     feedback_rating = feedback_rating if feedback_rating else "No Feedback"
     timestamp_str = timestamp.strftime('%Y-%m-%d %H:%M:%S')  # Format datetime as string
 
-    data = [
+    row = [
         question, answer, detected_lang, actual_lang, relevance_score,
         correct_output, response_time, fallback_used, translation_correct,
         feedback_rating, timestamp_str
     ]
-    sheet.append_row(data)
+    log_buffer.append(row)
 
 def main():
     st.title("💬 Agricultural Chatbot")
@@ -162,12 +170,13 @@ def handle_conversation(question):
         translation_correct = None if translation_correct == "Select" else translation_correct
 
     # Ensure feedback is logged after user action
-    if feedback_rating or translation_correct:  # Wait for user feedback
-        log_interaction_to_sheet(
+    if feedback_rating or translation_correct:
+        log_interaction_to_buffer(
             question, answer, detected_lang, src_lang_code, similarity, not fallback_used,
             response_time, fallback_used, translation_correct, feedback_rating,
             datetime.datetime.now()
         )
+        log_to_sheet()  # Commit feedback to Google Sheets
 
 if __name__ == "__main__":
     main()

@@ -97,7 +97,7 @@ def log_interaction_to_sheet(question, answer, detected_lang, actual_lang, relev
     answer = answer if answer is not None else "N/A"
     relevance_score = float(relevance_score)  # Convert float32 to Python float
     correct_output = str(correct_output)  # Convert boolean to string
-    translation_correct = str(translation_correct) if translation_correct is not None else "N/A"
+    translation_correct = translation_correct if translation_correct else "N/A"
     feedback_rating = feedback_rating if feedback_rating else "No Feedback"
     timestamp_str = timestamp.strftime('%Y-%m-%d %H:%M:%S')  # Format datetime as string
 
@@ -143,28 +143,28 @@ def handle_conversation(question):
     # Collect feedback from the user
     st.write("### Feedback:")
     feedback_rating = st.radio(
-        "Rate the answer:",
-        options=["Select", "1 - Poor", "2 - Fair", "3 - Average", "4 - Good", "5 - Excellent"],
+        "Rate the answer (1 - Poor, 5 - Excellent):",
+        options=["Select", "1", "2", "3", "4", "5"],
         key=f"feedback_rating_{uuid.uuid4().hex}"
     )
 
-    feedback_rating = None if feedback_rating == "Select" else feedback_rating.split(" - ")[0]
+    feedback_rating = None if feedback_rating == "Select" else feedback_rating
 
     translation_correct = None
     if detected_lang != "en":
         translation_correct = st.radio(
             "Was the translation done correctly?",
-            options=["Select", "Yes", "No"],  # Ensure no default selection
+            options=["Select", "Yes", "No"],
             key=f"translation_correct_{uuid.uuid4().hex}"
         )
         translation_correct = None if translation_correct == "Select" else translation_correct
 
-    # Log interaction
-    log_interaction_to_sheet(
-        question, answer, detected_lang, src_lang_code, similarity, not fallback_used,
-        response_time, fallback_used, translation_correct, feedback_rating,
-        datetime.datetime.now()
-    )
+    if feedback_rating or translation_correct:  # Log only if feedback is provided
+        log_interaction_to_sheet(
+            question, answer, detected_lang, src_lang_code, similarity, not fallback_used,
+            response_time, fallback_used, translation_correct, feedback_rating,
+            datetime.datetime.now()
+        )
 
 if __name__ == "__main__":
     main()

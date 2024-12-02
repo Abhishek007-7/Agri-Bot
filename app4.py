@@ -16,7 +16,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 import json
 
 # Load preprocessed embeddings and data
-@st.cache(allow_output_mutation=True)
+@st.cache_data
 def load_data():
     load_path = r'Saved_state/embeddings.pkl'
     with open(load_path, 'rb') as f:
@@ -142,10 +142,22 @@ def handle_conversation(question):
 
     # Collect feedback from the user
     st.write("### Feedback:")
-    feedback_satisfactory = st.radio("Was the answer satisfactory?", options=["Yes", "No"], index=-1, key=f"feedback_satisfactory_{uuid.uuid4().hex}")
+    feedback_satisfactory = st.radio(
+        "Was the answer satisfactory?",
+        options=["Select", "Yes", "No"],  # Add a placeholder
+        key=f"feedback_satisfactory_{uuid.uuid4().hex}"
+    )
     translation_correct = None
     if detected_lang != "en":
-        translation_correct = st.radio("Was the translation done correctly?", options=["Yes", "No"], index=-1, key=f"translation_correct_{uuid.uuid4().hex}")
+        translation_correct = st.radio(
+            "Was the translation done correctly?",
+            options=["Select", "Yes", "No"],  # Add a placeholder
+            key=f"translation_correct_{uuid.uuid4().hex}"
+        )
+
+    # Ensure no "Select" is logged; use None for unselected
+    feedback_satisfactory = None if feedback_satisfactory == "Select" else feedback_satisfactory
+    translation_correct = None if translation_correct == "Select" else translation_correct
 
     # Log interaction
     log_interaction_to_sheet(

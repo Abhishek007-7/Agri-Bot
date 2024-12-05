@@ -132,7 +132,7 @@ def handle_conversation(question):
 
     fallback_used = False
     if closest_question is None:
-        answer = "I'm sorry, I couldn't find an answer to your question in my dataset."
+        answer = "I'm sorry, I couldn't find an answer to your question in my memory."
         fallback_used = True
 
     audio_file = generate_speech(answer, src_lang_code)
@@ -157,7 +157,7 @@ def handle_conversation(question):
     # Collect feedback
     st.write("### Feedback:")
     feedback_rating = st.radio(
-        "Rate the answer (1 - Poor, 5 - Excellent):",
+        "Rate the answer (1 - Poor, 2 - Bad, 3- Average, 4 - Good, 5 - Excellent):",
         options=["Select", "1", "2", "3", "4", "5"],
         index=0,  # "Select" is the default option
         horizontal=True,
